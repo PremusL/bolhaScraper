@@ -1,6 +1,13 @@
+
 from bs4 import BeautifulSoup
 import requests
 import re
+from tkinter import *
+from tkinter import ttk
+import webbrowser
+
+
+
 
 page = 1
 
@@ -13,6 +20,46 @@ counter = 0
 
 baseLink = "https://www.bolha.com"
 a1 = ""
+
+
+win = Tk()
+win.geometry("1300x800")
+
+
+#Frame
+main_frame = Frame(win)
+main_frame.pack(fill=BOTH, expand=1)
+
+#Canvas
+canvas = Canvas(main_frame)
+canvas.pack(side=LEFT, fill=BOTH, expand=1)
+
+#Scrollbar
+scroll = ttk.Scrollbar(main_frame, orient=VERTICAL, command=canvas.yview)
+scroll.pack(side=RIGHT, fill=Y)
+
+#Canvas configuation
+canvas.configure(yscrollcommand = scroll.set)
+canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion = canvas.bbox("all")))
+
+#second Frame in canvas
+secondFrame = Frame(canvas)
+
+
+canvas.create_window((0,0), window=secondFrame, anchor="nw")
+
+priceLabel = Label(secondFrame, text="price", width=15)
+priceLabel.grid(row=0, column=0)
+
+nameLabel = Label(secondFrame, text="name", width=30)
+nameLabel.grid(row=0, column=1)
+
+linkLabel = Label(secondFrame, text="link", width=55)
+linkLabel.grid(row=0, column=2)
+# sb = Scrollbar(, orient=VERTICAL)
+# sb.grid(row=0, column=1, sticky=NS)
+
+
 
 
 while st != 0:
@@ -66,9 +113,6 @@ while st != 0:
 
         tempDic['name'] = a1
         tempDic['link'] = baseLink + linkToItem
-        
-
-
         counter += 1
 
 
@@ -91,7 +135,30 @@ def sorting(prices):
 # listofPrices = listOfPrices.sort(key=sorting())
 # print(counter)
 newList = sorted(listOfPrices, key=lambda i: i['price'])
-print(newList)
+# print(newList)
+
+position = 1
+newIndex = 0
+for thing in newList:
+    tempLabel1 = Label(secondFrame, text=(str(thing['price'])+'€'))
+    tempLabel1.grid(row=position, column=0)
+
+    tempLabel2 = Label(secondFrame, text=thing['name'])
+    tempLabel2.grid(row=position, column=1)
+
+    tempLabel3 = Label(secondFrame, text=thing['link'], fg="blue", cursor="hand2")
+    
+    tempLabel3.grid(row=position, column=2)
+    
+    tempLabel3.bind("<Button-1>", lambda e: callback(tempLabel3.cget("text")))
+
+    newIndex += 1
+    position += 1
+
+
+def callback(url):
+    
+    webbrowser.open_new(url)
 
 
 # url = "https://www.bolha.com/nvidia-graficne-kartice?page="+str(page)
@@ -114,3 +181,4 @@ print(newList)
 
 
 
+win.mainloop()
