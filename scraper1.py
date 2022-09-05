@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 import requests
+import re
 
 page = 1
 
@@ -7,10 +8,11 @@ st = -1
 listOfPrices = []
 listOfNames = []
 listOfUrls = []
+h3 = []
+counter = 0
 
-
-
-
+baseLink = "https://www.bolha.com"
+a1 = ""
 
 
 while st != 0:
@@ -26,34 +28,70 @@ while st != 0:
     prices = p1.find_all("div",class_="entity-prices")
     index = 0
 
-    counter = 0
-    tempDic = {}
+    
     for pr in prices:
+        tempDic = {}
+        
         h3 = p1.find_all("h3", class_="entity-title")[index]
-        a1 = h3.find("a").text.strip()
         p2 = pr.find_all("li")[0]
         p3 = pr.find("strong").text.strip()
-        # print(p3, ": ", a1)
 
-        # orderedList[counter] = p3 
-        tempDic['price'] = p3
+        a2 = h3.find("a")
+        linkToItem = a2.get('href')
+        a1 = a2.text.strip()
+        # print(a1 + "  |||"  + p3 + "|||  " + baseLink+linkToItem)
+
+        numbers = re.findall("([0-9.]*[0-9]+)", p3)
+        # tempDic['price'] = 0
+        # tempDic['name'] = ""
+        
+        number1 = 0
+        if (len(numbers) > 1):
+            tempDic['price'] = int(numbers[0])+1
+
+        elif (len(numbers) == 1):
+            tempNum = numbers[0].split(".")
+            index1 = 0
+            
+            while (len(tempNum) > index1):
+                number1 *= 1000
+                number1 += int(tempNum[index1])
+                index1 += 1
+             
+            tempDic['price'] = number1
+        
+        else:
+            tempDic['price'] = -999
+
+
         tempDic['name'] = a1
+        tempDic['link'] = baseLink + linkToItem
+        
 
-        listOfPrices.append(tempDic)
+
+        counter += 1
+
 
         
-        st += 1
-        index += 1
-    
+        # print(a1 + " " + str(number) + " " + linkToItem)
 
+        listOfPrices.append(tempDic);   
+        index += 1
+
+    if (prices == 0):
+        st += 1
+    
     page += 1
+
+
 
 def sorting(prices):
     return prices.get("price")
 
-listofPrices = listOfPrices.sort(key=sorting)
-# print(len(listOfPrices))
-print(listOfPrices)
+# listofPrices = listOfPrices.sort(key=sorting())
+# print(counter)
+newList = sorted(listOfPrices, key=lambda i: i['price'])
+print(newList)
 
 
 # url = "https://www.bolha.com/nvidia-graficne-kartice?page="+str(page)
